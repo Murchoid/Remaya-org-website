@@ -135,12 +135,7 @@
         </p>
       </div>
     
-      <form class="contact-form" action="https://api.web3forms.com/submit" method="POST">
-    
-        <input type="hidden" name="access_key" value="d3255553-9662-4110-89ab-a9a400f0e69c" />
-        <input type="hidden" name="subject" value="New Contact Form Submission from Web3Forms" />
-        <input type="hidden" name="from_name" value="My Website" />
-        <!-- More custom ization options available in the docs: https://docs.web3forms.com -->
+      <form class="contact-form" method="POST" id="emailForm">
     
         <div class="form-group-container">
           <div class="form-group">
@@ -187,10 +182,11 @@
               </div>
               <div class="h-captcha" data-captcha="true"></div>
             </div>
-            <button class="form-submit" type="submit">Enroll</button>
+            <button class="form-submit" type="submit" id="result">Enroll</button>
           </form>
           <script src="https://js.hcaptcha.com/1/api.js"></script>
       </div>
+
      </div>
      </section>
     
@@ -202,48 +198,42 @@
             </div>
         </footer>
         <script src="app.js"></script>
-        <script src="https://web3forms.com/client/script.js" async defer></script>
     
     <script>
-    const form = document.getElementById('form');
-    const result = document.getElementById('result');
-    
-    form.addEventListener('submit', function(e) {
-      e.preventDefault();
-      const formData = new FormData(form);
-      const object = Object.fromEntries(formData);
-      const json = JSON.stringify(object);
-      result.innerHTML = "Please wait..."
-    
-        fetch('https://api.web3forms.com/submit', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json'
-                },
-                body: json
-            })
-            .then(async (response) => {
-                let json = await response.json();
-                if (response.status == 200) {
-                    result.innerHTML = "Form submitted successfully";
-                } else {
-                    console.log(response);
-                    result.innerHTML = json.message;
-                }
-            })
-            .catch(error => {
-                console.log(error);
-                result.innerHTML = "Something went wrong!";
-            })
-            .then(function() {
-                form.reset();
-                setTimeout(() => {
-                    result.style.display = "none";
-                }, 3000);
-            });
+   document.getElementById('emailForm').addEventListener('submit', async (event) => {
+  event.preventDefault();
+
+  const email = document.getElementById('email').value;
+  const message = document.getElementById('message').value;
+  const phone = document.getElementById('phone').value;
+  const name = document.getElementById('name').value;
+
+  try {
+    const response = await fetch('http://localhost:3000/send-email', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ email, text: message,name,phone })
     });
-    </script>
+
+    let result;
+    try {
+      result = await response.json();
+    } catch (error) {
+      throw new Error('Invalid JSON response');
+    }
+
+    if (response.ok) {
+      alert('Email sent successfully!');
+    } else {
+      alert('Error sending email: ' + result.error);
+    }
+  } catch (error) {
+    alert('Error sending email: ' + error.message);
+  }
+});
+</script>
 </main>
 </body>
 </html>
